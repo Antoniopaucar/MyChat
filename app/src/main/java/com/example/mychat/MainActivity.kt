@@ -16,12 +16,22 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.mychat.ui.LoginScreen
 import com.example.mychat.ui.theme.MyChatTheme
+import androidx.room.Room
+import com.example.mychat.ui.MyChatDatabase
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val context = this
+            // Inicializar Room usando createFromAsset
+            val db = Room.databaseBuilder(
+                context,
+                MyChatDatabase::class.java,
+                "mychat.db"
+            ).createFromAsset("mychat.db").build()
+            val usuarioDao = db.usuarioDao()
             MyChatTheme {
                 val navController = rememberNavController()
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -44,7 +54,8 @@ class MainActivity : ComponentActivity() {
                             com.example.mychat.ui.RegisterScreen(
                                 onBackToLogin = {
                                     navController.popBackStack()
-                                }
+                                },
+                                usuarioDao = usuarioDao
                             )
                         }
                     }

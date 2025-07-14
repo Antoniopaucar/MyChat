@@ -8,10 +8,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.mychat.ui.Usuario
+import com.example.mychat.ui.UsuarioDao
+import kotlinx.coroutines.launch
 
 @Composable
 fun RegisterScreen(
-    onBackToLogin: () -> Unit
+    onBackToLogin: () -> Unit,
+    usuarioDao: UsuarioDao
 ) {
     var nombre by remember { mutableStateOf("") }
     var usuario by remember { mutableStateOf("") }
@@ -19,6 +23,7 @@ fun RegisterScreen(
     var correo by remember { mutableStateOf("") }
     var selectedIndex by remember { mutableStateOf(-1) }
     var usuarios by remember { mutableStateOf(listOf<Usuario>()) }
+    val coroutineScope = rememberCoroutineScope()
 
     fun limpiarCampos() {
         nombre = ""
@@ -26,6 +31,11 @@ fun RegisterScreen(
         clave = ""
         correo = ""
         selectedIndex = -1
+    }
+
+    // Cargar usuarios al iniciar
+    LaunchedEffect(Unit) {
+        usuarios = usuarioDao.getAll()
     }
 
     Column(
@@ -71,22 +81,30 @@ fun RegisterScreen(
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Button(onClick = {
                 if (nombre.isNotBlank() && usuario.isNotBlank() && clave.isNotBlank() && correo.isNotBlank()) {
-                    if (selectedIndex == -1) {
-                        // Insertar
-                        val nuevo = Usuario(
-                            id = (usuarios.maxOfOrNull { it.id } ?: 0) + 1,
-                            nombre = nombre,
-                            usuario = usuario,
-                            clave = clave,
-                            correo = correo
-                        )
-                        usuarios = usuarios + nuevo
-                        limpiarCampos()
-                    } else {
-                        // Actualizar
-                        usuarios = usuarios.mapIndexed { idx, u ->
-                            if (idx == selectedIndex) u.copy(nombre = nombre, usuario = usuario, clave = clave, correo = correo) else u
+                    coroutineScope.launch {
+                        if (selectedIndex == -1) {
+                            // Insertar
+                            usuarioDao.insert(
+                                Usuario(
+                                    nombre = nombre,
+                                    usuario = usuario,
+                                    clave = clave,
+                                    correo = correo
+                                )
+                            )
+                        } else {
+                            // Actualizar
+                            val usuarioActual = usuarios[selectedIndex]
+                            usuarioDao.update(
+                                usuarioActual.copy(
+                                    nombre = nombre,
+                                    usuario = usuario,
+                                    clave = clave,
+                                    correo = correo
+                                )
+                            )
                         }
+                        usuarios = usuarioDao.getAll()
                         limpiarCampos()
                     }
                 }
@@ -95,8 +113,11 @@ fun RegisterScreen(
             }
             Button(onClick = {
                 if (selectedIndex != -1) {
-                    usuarios = usuarios.filterIndexed { idx, _ -> idx != selectedIndex }
-                    limpiarCampos()
+                    coroutineScope.launch {
+                        usuarioDao.delete(usuarios[selectedIndex])
+                        usuarios = usuarioDao.getAll()
+                        limpiarCampos()
+                    }
                 }
             }, enabled = selectedIndex != -1) {
                 Text("Eliminar")
