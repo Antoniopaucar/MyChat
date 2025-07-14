@@ -36,7 +36,14 @@ class MainActivity : ComponentActivity() {
                                     // Aquí irá la lógica de validación de login
                                 },
                                 onRegisterClick = {
-                                    // Aquí irá la navegación a la pantalla de registro
+                                    navController.navigate("register")
+                                }
+                            )
+                        }
+                        composable("register") {
+                            com.example.mychat.ui.RegisterScreen(
+                                onBackToLogin = {
+                                    navController.popBackStack()
                                 }
                             )
                         }
