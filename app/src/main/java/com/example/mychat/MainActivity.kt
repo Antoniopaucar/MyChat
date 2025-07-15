@@ -55,7 +55,11 @@ class MainActivity : ComponentActivity() {
                             var errorMessage by remember { mutableStateOf("") }
                             if (isLoggedInState.value) {
                                 ChatScreen(
-                                    onMenuOptionSelected = { /* TODO: manejar menú */ },
+                                    onMenuOptionSelected = { option ->
+                                        if (option == "cerrar_sesion") {
+                                            isLoggedInState.value = false
+                                        }
+                                    },
                                     onSendMessage = { /* TODO: manejar envío */ }
                                 )
                             } else {
