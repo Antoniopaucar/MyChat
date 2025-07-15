@@ -22,6 +22,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import com.example.mychat.ui.ChatScreen
 import com.example.mychat.ui.RegisterScreen
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.LocalView
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,21 +52,23 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable("login") {
                             val isLoggedInState = remember { mutableStateOf(false) }
+                            var errorMessage by remember { mutableStateOf("") }
                             if (isLoggedInState.value) {
                                 ChatScreen(
                                     onMenuOptionSelected = { /* TODO: manejar menú */ },
                                     onSendMessage = { /* TODO: manejar envío */ }
                                 )
                             } else {
-                            LoginScreen(
-                                onLoginClick = { username, password ->
-                                        // Aquí puedes validar el usuario (por ahora, login siempre exitoso)
-                                        isLoggedInState.value = true
-                                },
-                                onRegisterClick = {
-                                    navController.navigate("register")
-                                }
-                            )
+                                LoginScreen(
+                                    onLoginClick = { _, _ -> },
+                                    onRegisterClick = {
+                                        navController.navigate("register")
+                                    },
+                                    usuarioDao = usuarioDao,
+                                    errorMessage = errorMessage,
+                                    setErrorMessage = { errorMessage = it },
+                                    setLoggedIn = { isLoggedInState.value = it }
+                                )
                             }
                         }
                         composable("register") {

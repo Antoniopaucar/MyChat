@@ -7,14 +7,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
+import com.example.mychat.ui.UsuarioDao
 
 @Composable
 fun LoginScreen(
     onLoginClick: (String, String) -> Unit,
-    onRegisterClick: () -> Unit
+    onRegisterClick: () -> Unit,
+    usuarioDao: UsuarioDao,
+    errorMessage: String = "",
+    setErrorMessage: (String) -> Unit = {},
+    setLoggedIn: (Boolean) -> Unit = {}
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val coroutineScope = rememberCoroutineScope()
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -42,9 +49,23 @@ fun LoginScreen(
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth()
             )
+            if (errorMessage.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = errorMessage, color = MaterialTheme.colorScheme.error)
+            }
             Spacer(modifier = Modifier.height(24.dp))
             Button(
-                onClick = { onLoginClick(username, password) },
+                onClick = {
+                    coroutineScope.launch {
+                        val usuario = usuarioDao.login(username, password)
+                        if (usuario != null) {
+                            setErrorMessage("")
+                            setLoggedIn(true)
+                        } else {
+                            setErrorMessage("Usuario o contraseña incorrectos")
+                        }
+                    }
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Iniciar sesión")
