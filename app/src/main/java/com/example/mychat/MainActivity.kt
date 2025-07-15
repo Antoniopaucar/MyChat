@@ -18,6 +18,10 @@ import com.example.mychat.ui.LoginScreen
 import com.example.mychat.ui.theme.MyChatTheme
 import androidx.room.Room
 import com.example.mychat.ui.MyChatDatabase
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import com.example.mychat.ui.ChatScreen
+import com.example.mychat.ui.RegisterScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,17 +45,26 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding)
                     ) {
                         composable("login") {
-                            LoginScreen(
-                                onLoginClick = { username, password ->
-                                    // Aquí irá la lógica de validación de login
-                                },
-                                onRegisterClick = {
-                                    navController.navigate("register")
-                                }
-                            )
+                            val isLoggedInState = remember { mutableStateOf(false) }
+                            if (isLoggedInState.value) {
+                                ChatScreen(
+                                    onMenuOptionSelected = { /* TODO: manejar menú */ },
+                                    onSendMessage = { /* TODO: manejar envío */ }
+                                )
+                            } else {
+                                LoginScreen(
+                                    onLoginClick = { username, password ->
+                                        // Aquí puedes validar el usuario (por ahora, login siempre exitoso)
+                                        isLoggedInState.value = true
+                                    },
+                                    onRegisterClick = {
+                                        navController.navigate("register")
+                                    }
+                                )
+                            }
                         }
                         composable("register") {
-                            com.example.mychat.ui.RegisterScreen(
+                            RegisterScreen(
                                 onBackToLogin = {
                                     navController.popBackStack()
                                 },
