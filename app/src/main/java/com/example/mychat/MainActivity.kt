@@ -52,15 +52,15 @@ class MainActivity : ComponentActivity() {
                                     onSendMessage = { /* TODO: manejar envío */ }
                                 )
                             } else {
-                                LoginScreen(
-                                    onLoginClick = { username, password ->
+                            LoginScreen(
+                                onLoginClick = { username, password ->
                                         // Aquí puedes validar el usuario (por ahora, login siempre exitoso)
                                         isLoggedInState.value = true
-                                    },
-                                    onRegisterClick = {
-                                        navController.navigate("register")
-                                    }
-                                )
+                                },
+                                onRegisterClick = {
+                                    navController.navigate("register")
+                                }
+                            )
                             }
                         }
                         composable("register") {
